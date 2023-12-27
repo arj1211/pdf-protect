@@ -182,11 +182,17 @@ class PDFEncryptorApp:
             self.label.config(text="Please select a folder.", fg="#ff9999")
             return
 
+        self.generate_password_button.config(state="disabled")
+        self.encrypt_button.config(state="disabled")
+        self.exit_button.config(state="disabled")
+
         new_folder_name = os.path.join(self.selected_folder, "protected")
         if not os.path.exists(new_folder_name):
             os.mkdir(new_folder_name)
 
         self.password = self.password_entry.get() or self.generate_password()
+
+        self.password_entry.config(state="readonly")
 
         t1 = time.time()
 
@@ -241,6 +247,8 @@ class PDFEncryptorApp:
         if last_char_visible:
             self.progress_text.yview("end")
         self.progress_text.configure(state="disabled")
+
+        self.exit_button.config(state="normal")
 
 
 if __name__ == "__main__":
