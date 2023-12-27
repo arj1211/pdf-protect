@@ -139,10 +139,10 @@ class PDFEncryptorApp:
             last_char_visible = self.preview_text.bbox("end-1c")
             self.preview_text.insert("end", f"{pdf_file}\n")
             if last_char_visible:
-                self.preview_text.see("end")
+                self.preview_text.yview("end")
 
         if last_char_visible:
-            self.preview_text.see("end")
+            self.preview_text.yview("end")
         self.preview_text.configure(state="disabled")
 
     def generate_password(self):
@@ -202,13 +202,13 @@ class PDFEncryptorApp:
             last_char_visible = self.progress_text.bbox("end-1c")
             self.progress_text.insert("end", f"Encrypting {fname} ... ")
             if last_char_visible:
-                self.progress_text.see("end")
+                self.progress_text.yview("end")
             self.progress_text.configure(state="disabled")
             self.add_encryption(input_path, output_path, self.password)
             self.progress_text.configure(state="normal")
             self.progress_text.insert("end", f"Done\n")
             if last_char_visible:
-                self.progress_text.see("end")
+                self.progress_text.yview("end")
             self.progress_text.configure(state="disabled")
 
             progress_value = ((i + 1) / len(pdf_list)) * 100
@@ -219,7 +219,7 @@ class PDFEncryptorApp:
         time_taken = "{:.2f}".format(t2 - t1)
         self.label.config(text=f"Time taken: {time_taken} seconds", fg="#00ccff")
         self.progress_text.configure(state="normal")
-        h_text_divider = "~" * (len(new_folder_name) + 1) + "\n"
+        h_text_divider = "\n" + "~" * (len(new_folder_name) + 1) + "\n"
         last_char_visible = self.progress_text.bbox("end-1c")
         self.progress_text.insert("end", h_text_divider)
         self.progress_text.insert("end", "Encrypted PDFs are located in:\n")
@@ -239,7 +239,7 @@ class PDFEncryptorApp:
             )
 
         if last_char_visible:
-            self.progress_text.see("end")
+            self.progress_text.yview("end")
         self.progress_text.configure(state="disabled")
 
 
