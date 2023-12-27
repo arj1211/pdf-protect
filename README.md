@@ -30,3 +30,6 @@ This is a simple PDF Encryptor application built using Tkinter for the GUI and p
 
 ## Limitations
 - The PDF encryption process might take some time, depending on the number and size of the PDF files.
+
+## Build
+`pyinstaller --name 'PDF Encryptor' --icon 'icon/icon_1.icns' --windowed --onefile  pdf-protect-gui.py`
