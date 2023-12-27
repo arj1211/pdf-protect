@@ -12,6 +12,7 @@ from tkinter import (
     Tk,
     filedialog,
 )
+from tkinter.scrolledtext import ScrolledText
 from tkinter.ttk import Progressbar
 
 from pypdf import PdfReader, PdfWriter
@@ -21,7 +22,6 @@ class PDFEncryptorApp:
     def __init__(self, master):
         self.master = master
         master.title("PDF Encryptor App")
-        # master.geometry("800x800")  # Set initial size
         master.geometry("")  # Set initial size
         master.resizable(False, False)  # Make window non-resizable
 
@@ -39,7 +39,8 @@ class PDFEncryptorApp:
         self.preview_label = Label(self.folder_frame, text="PDF Files in the Folder:")
         self.preview_label.pack()
 
-        self.preview_text = Text(
+        # Use ScrolledText instead of Text
+        self.preview_text = ScrolledText(
             self.folder_frame,
             height=10,
             width=50,
@@ -86,7 +87,8 @@ class PDFEncryptorApp:
         )
         self.progress_bar.pack()
 
-        self.messages_text = Text(
+        # Use ScrolledText instead of Text
+        self.progress_text = ScrolledText(
             self.progress_frame,
             height=10,
             width=50,
@@ -95,7 +97,7 @@ class PDFEncryptorApp:
             pady=5,
             wrap="none",
         )
-        self.messages_text.pack()
+        self.progress_text.pack()
 
         self.encrypt_exit_frame = Frame(master)
         self.encrypt_exit_frame.pack(padx=10, pady=10, fill="x")
@@ -126,7 +128,13 @@ class PDFEncryptorApp:
         self.preview_text.delete(1.0, "end")
         pdf_list = [f for f in os.listdir(self.selected_folder) if f.endswith(".pdf")]
         for pdf_file in pdf_list:
+            last_char_visible = self.preview_text.bbox("end-1c")
             self.preview_text.insert("end", f"{pdf_file}\n")
+            if last_char_visible:
+                self.preview_text.see("end")
+
+        if last_char_visible:
+            self.preview_text.see("end")
         self.preview_text.configure(state="disabled")
 
     def generate_password(self):
@@ -176,19 +184,24 @@ class PDFEncryptorApp:
 
         pdf_list = [f for f in os.listdir(self.selected_folder) if f.endswith(".pdf")]
 
-        self.messages_text.delete(1.0, "end")
+        self.progress_text.delete(1.0, "end")
 
         for i in range(len(pdf_list)):
             fname = pdf_list[i]
             input_path = os.path.join(self.selected_folder, fname)
             output_path = os.path.join(new_folder_name, fname)
-            self.messages_text.configure(state="normal")
-            self.messages_text.insert("end", f"Encrypting {fname} ... ")
-            self.messages_text.configure(state="disabled")
+            self.progress_text.configure(state="normal")
+            last_char_visible = self.progress_text.bbox("end-1c")
+            self.progress_text.insert("end", f"Encrypting {fname} ... ")
+            if last_char_visible:
+                self.progress_text.see("end")
+            self.progress_text.configure(state="disabled")
             self.add_encryption(input_path, output_path, self.password)
-            self.messages_text.configure(state="normal")
-            self.messages_text.insert("end", f"Done\n")
-            self.messages_text.configure(state="disabled")
+            self.progress_text.configure(state="normal")
+            self.progress_text.insert("end", f"Done\n")
+            if last_char_visible:
+                self.progress_text.see("end")
+            self.progress_text.configure(state="disabled")
 
             progress_value = ((i + 1) / len(pdf_list)) * 100
             self.progress_bar["value"] = progress_value
@@ -197,13 +210,17 @@ class PDFEncryptorApp:
         t2 = time.time()
         time_taken = "{:.2f}".format(t2 - t1)
         self.label.config(text=f"Time taken: {time_taken} seconds", fg="#00ccff")
-        self.messages_text.configure(state="normal")
-        self.messages_text.insert(
-            "end",
-            f"{'~'*(len(new_folder_name)+1)}\nEncrypted PDFs are located in:\n{new_folder_name}\n{'~'*(len(new_folder_name)+1)}\n",
-        )
-        self.messages_text.insert("end", "Encryption process complete.")
-        self.messages_text.configure(state="disabled")
+        self.progress_text.configure(state="normal")
+        h_text_divider = "~" * (len(new_folder_name) + 1) + "\n"
+        last_char_visible = self.progress_text.bbox("end-1c")
+        self.progress_text.insert("end", h_text_divider)
+        self.progress_text.insert("end", "Encrypted PDFs are located in:\n")
+        self.progress_text.insert("end", new_folder_name + "\n")
+        self.progress_text.insert("end", h_text_divider)
+        self.progress_text.insert("end", "Encryption process complete.")
+        if last_char_visible:
+            self.progress_text.see("end")
+        self.progress_text.configure(state="disabled")
 
 
 if __name__ == "__main__":
