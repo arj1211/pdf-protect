@@ -122,6 +122,7 @@ class PDFEncryptorApp:
 
         self.selected_folder = None
         self.password = None
+        self.encrypting = False  # Flag to indicate whether encrypt_pdfs is running
 
     def select_folder(self):
         self.selected_folder = filedialog.askdirectory()
@@ -177,6 +178,14 @@ class PDFEncryptorApp:
         with open(output_pdf, "wb") as fh:
             pdf_writer.write(fh)
 
+    def update_time_elapsed(self, start_time):
+        if self.encrypting:
+            elapsed_time = time.time() - start_time
+            self.label.config(
+                text=f"Time taken: {elapsed_time:.2f} seconds", fg="#00ccff"
+            )
+            self.master.after(1000, lambda: self.update_time_elapsed(start_time))
+
     def encrypt_pdfs(self):
         if not self.selected_folder:
             self.label.config(text="Please select a folder.", fg="#ff9999")
@@ -185,6 +194,12 @@ class PDFEncryptorApp:
         self.generate_password_button.config(state="disabled")
         self.encrypt_button.config(state="disabled")
         self.exit_button.config(state="disabled")
+        self.save_password_checkbox.config(state="disabled")
+
+        self.encrypting = True  # Set the flag to True
+
+        t1 = time.time()
+        self.update_time_elapsed(t1)
 
         new_folder_name = os.path.join(self.selected_folder, "protected")
         if not os.path.exists(new_folder_name):
@@ -193,8 +208,6 @@ class PDFEncryptorApp:
         self.password = self.password_entry.get() or self.generate_password()
 
         self.password_entry.config(state="readonly")
-
-        t1 = time.time()
 
         pdf_list = [f for f in os.listdir(self.selected_folder) if f.endswith(".pdf")]
 
@@ -221,9 +234,6 @@ class PDFEncryptorApp:
             self.progress_bar["value"] = progress_value
             self.progress_frame.update()
 
-        t2 = time.time()
-        time_taken = "{:.2f}".format(t2 - t1)
-        self.label.config(text=f"Time taken: {time_taken} seconds", fg="#00ccff")
         self.progress_text.configure(state="normal")
         h_text_divider = "\n" + "~" * (len(new_folder_name) + 1) + "\n"
         last_char_visible = self.progress_text.bbox("end-1c")
@@ -247,6 +257,12 @@ class PDFEncryptorApp:
         if last_char_visible:
             self.progress_text.yview("end")
         self.progress_text.configure(state="disabled")
+
+        self.encrypting = False  # Reset the flag when encrypt_pdfs is done
+
+        t2 = time.time()
+        time_taken = f"{t2 - t1:.2f}"
+        self.label.config(text=f"Time taken: {time_taken} seconds", fg="#00ccff")
 
         self.exit_button.config(state="normal")
 
