@@ -76,6 +76,14 @@ class PDFEncryptorApp:
         )
         self.generate_password_button.pack()
 
+        self.save_password_var = IntVar(value=1)  # Initialize to 1 for checked state
+        self.save_password_checkbox = Checkbutton(
+            self.password_frame,
+            text="Save Password to File",
+            variable=self.save_password_var,
+        )
+        self.save_password_checkbox.pack()
+
         self.progress_frame = Frame(master)
         self.progress_frame.pack(padx=10, pady=10, fill="x")
 
@@ -218,6 +226,18 @@ class PDFEncryptorApp:
         self.progress_text.insert("end", new_folder_name + "\n")
         self.progress_text.insert("end", h_text_divider)
         self.progress_text.insert("end", "Encryption process complete.")
+
+        # Save password to file if the checkbox is checked
+        if self.save_password_var.get():
+            password_file_name = os.path.join(
+                self.selected_folder, "PDF Encryptor Password.txt"
+            )
+            with open(password_file_name, "w") as pf:
+                pf.write(f"Password is: {self.password}")
+            self.progress_text.insert(
+                "end", f"\n{h_text_divider}Password file saved at\n{password_file_name}"
+            )
+
         if last_char_visible:
             self.progress_text.see("end")
         self.progress_text.configure(state="disabled")
